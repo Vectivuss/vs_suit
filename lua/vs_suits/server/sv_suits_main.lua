@@ -1,5 +1,5 @@
 
-resource.AddWorkshop("3048032975")
+resource.AddWorkshop("3048036384")
 
 function VectivusSuits.FormatKey( str )
     str = str or ""
