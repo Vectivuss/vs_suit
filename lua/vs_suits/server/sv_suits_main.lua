@@ -1,5 +1,5 @@
 
-resource.AddWorkshop("3048036384")
+resource.AddWorkshop("3048032975")
 
 function VectivusSuits.FormatKey( str )
     str = str or ""
@@ -183,8 +183,11 @@ function VectivusSuits.OnTakeDamage( e, t )
     local damage = math.floor( t:GetDamage() )
 
     do // suit damage reduction
-        local wep = t:GetAttacker() and IsValid(t:GetAttacker():GetActiveWeapon()) and t:GetAttacker():GetActiveWeapon():GetClass() or ""
-        if data.weapons then damage = math.floor(damage/data.weapons[wep]) end
+        local wep = t:GetAttacker() and (IsValid(t:GetAttacker():GetActiveWeapon()) and t:GetAttacker():GetActiveWeapon():GetClass()) or ""
+        if data.weapons then
+            data.weapons[wep] = data.weapons[wep] or 1
+            damage = math.floor(damage/data.weapons[wep] or 1) 
+        end
     end
 
     local hp = tt.SuitHealth
