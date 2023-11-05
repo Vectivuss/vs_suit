@@ -54,10 +54,9 @@ function VectivusSuits.SetPlayerAbilityCooldown( p, i, v )
     p:SetNWBool( "VectivusSuits.Ability.Cooldown."..tostring(i), v )
 end
 
-function VectivusSuits.SpawnSuit( p, k, bool ) // player, suitkey, hasdata
+function VectivusSuits.SpawnSuit( p, k ) // player, suitkey, hasdata
     if !IsValid(p) or !p:IsPlayer() then return end
     if !VectivusSuits.GetSuitData(k) then return end
-    bool = bool or false
     local trace = {}
     trace.start = p:EyePos()
     trace.endpos = trace.start+p:GetAimVector()*90
@@ -66,7 +65,7 @@ function VectivusSuits.SpawnSuit( p, k, bool ) // player, suitkey, hasdata
     local e = ents.Create( "vs_suit_base" )
     e:SetPos( tr.HitPos )
     e:Spawn()
-    if IsValid(p) and bool then
+    if VectivusSuits.GetPlayerSuit(p) then
         for kk, v in pairs(VectivusSuits.GetVar(p)) do
             e["Set"..kk](e,v)
             VectivusSuits.SetVar(p,kk,nil)
@@ -80,10 +79,14 @@ function VectivusSuits.SpawnSuit( p, k, bool ) // player, suitkey, hasdata
     hook.Run( "VectivusSuits.SpawnedSuit", p, k )
     return e
 end
-concommand.Add( "vs.suits.spawn", function( p, _, t )
+concommand.Add( "vs.suit.givesuit", function( p, _, t )
     if p != NULL then return end
-    local k = tostring( t[1] or "" )
-    VectivusSuits.SpawnSuit( p, k )
+    local sid64 = t[1]
+    local suit = tostring( t[2] or "" )
+    suit = string.StartsWith(suit,"vs_suit_") and string.Replace(suit,"vs_suit_","")
+    local pp = player.GetBySteamID64(sid64)
+    if !pp then return end
+    VectivusSuits.SpawnSuit( pp, suit )
 end )
 
 function VectivusSuits.EquipSuit( p, k, e )
@@ -153,7 +156,7 @@ function VectivusSuits.DropSuit( p, txt )
         if !IsValid(p) or !p:IsPlayer() then return end
         if !p.vs_suit_drop then return end
         do // create suit
-            VectivusSuits.SpawnSuit( p, k, true )
+            VectivusSuits.SpawnSuit( p, k )
         end
         p:SetMaterial( "Models/effects/comball_tape" )
         VectivusSuits.RemoveSuit( p )
