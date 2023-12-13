@@ -117,7 +117,10 @@ function VectivusSuits.EquipSuit( p, k, e )
     hook.Run( "VectivusSuits.OnEquippedSuit", p, k )
 end
 hook.Add( "VectivusSuits.OnEquippedSuit", "a", function(p)
-    timer.Simple(.2,function() if !IsValid(p) then return end;p:SetMaterial("")end)
+    timer.Simple(.2, function() 
+        if !IsValid(p) then return end
+        p:SetMaterial("")
+    end)
 end )
 
 function VectivusSuits.RemoveSuit( p )
@@ -161,7 +164,10 @@ function VectivusSuits.DropSuit( p, txt )
         p:SetMaterial( "Models/effects/comball_tape" )
         VectivusSuits.RemoveSuit( p )
         p.vs_suit_drop = nil
-        timer.Simple(.2,function() if !IsValid(p) then return end;p:SetMaterial("")end)
+        timer.Simple( .2, function() 
+            if !IsValid(p) then return end
+            p:SetMaterial("")
+        end)
     end )
     return ""
 end
@@ -184,7 +190,7 @@ function VectivusSuits.OnTakeDamage( e, t )
     if hook.Run( "VectivusSuits.CanTakeDamage", p, t, data ) == false then t:SetDamage( 0 ) return end
     local damage = math.floor( t:GetDamage() )
     do // suit damage reduction
-        local wep = t:GetAttacker() and (IsValid(t:GetAttacker():GetActiveWeapon()) and t:GetAttacker():GetActiveWeapon():GetClass()) or ""
+        local wep = IsValid(t:GetAttacker()) and (IsValid(t:GetAttacker():GetActiveWeapon()) and t:GetAttacker():GetActiveWeapon():GetClass()) or ""
         if data.weapons then
             data.weapons[wep] = data.weapons[wep] or 1
             damage = math.floor(damage/data.weapons[wep] or 1) 
