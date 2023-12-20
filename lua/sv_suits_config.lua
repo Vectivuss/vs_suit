@@ -25,21 +25,15 @@ VectivusSuits.CreateSuit( "Test Suit", {
     weapons = { // weapons that have % immunity, [weaponclass] = 1.1 (percentage)
         ["weapon_rpg"] = 1.4 -- 40% reduction to dmg
     },
-    abilities = { // make sure that you lowercase the ability key or it will break, [abilitykey] = KeyBind
-        ["sonic"] = KEY_V,
-        ["regeneration"] = KEY_B,
-        ["antman"] = KEY_N,
+    abilities = { // [abilitykey] = KeyBind
+        ["Sonic"] = KEY_V,
+        ["Regeneration"] = KEY_B,
+        ["AntMan"] = KEY_N,
     },
     OnEquip = function( p ) // player(self)
 
     end,
     OnRemove = function( p ) // player(self)
-
-    end,
-    OnAttack = function( att, p, t ) // attacker, victim, ctakedamageinfo
-    
-    end,
-    OnAttacked = function( p, att, t ) // attacker, victim, ctakedamageinfo
 
     end,
 } )

@@ -97,8 +97,8 @@ function VectivusSuits.HUDStats()
     local hp = VectivusSuits.GetVar( p, "SuitHealth" ) or 0
     local ap = VectivusSuits.GetVar( p, "SuitArmor" ) or 0
     surface.SetFont( "vs.suits.uib.22" )
-    local txt = string.format( VectivusSuits.Language["Health"], hp )
-    if ap > 0 then txt = string.format( tostring(txt) .. VectivusSuits.Language["Armor"], ap ) end
+    local txt = string.format( VectivusSuits.Language["Health"] or "", hp )
+    if ap > 0 then txt = string.format( tostring(txt) .. VectivusSuits.Language["Armor"] or "", ap ) end
     if cfg and cfg.speed and cfg.speed > 0 then txt = string.format( tostring(txt) .. VectivusSuits.Language["RunSpeed"], cfg.speed ) end
     if cfg and cfg.jumpPower and cfg.jumpPower > 0 then txt = string.format( tostring(txt) .. VectivusSuits.Language["JumpPower"], cfg.jumpPower ) end
     local tW = surface.GetTextSize( name..txt )
@@ -115,10 +115,14 @@ function VectivusSuits.HUDAbility()
     local p, w, h = LocalPlayer(), ScrW(), ScrH()
     local x, y, W, H = w/2, h, VectivusLib:Scale(70), VectivusLib:Scale(65)
     if !VectivusSuits.GetPlayerSuit(p) then return end
+    -- print(1)
     local cc, xx, yy, ww, hh = x-W/2, 0, y-H-(h*.01), W, H
     local padding = 6
     local ability = VectivusSuits.GetPlayerSuitAbilityTable(p) or {}
     local abilitiesCount = #ability
+
+    -- print(abilitiesCount)
+
     xx = xx - abilitiesCount*ww/2+W/2-padding
     local t = VectivusSuits.GetPlayerSuitTable(p)
     for k, bind in pairs( t and t.abilities or {} ) do

@@ -54,13 +54,10 @@ function VectivusSuits.GenerateSuits()
         ENT.PrintName = t.name
         ENT.Category = "Vectivus´s Suits"
         ENT.Spawnable = true
-        function ENT:SpawnFunction( p )
-            return VectivusSuits.SpawnSuit( p, k )
-        end
-        scripted_ents.Register( ENT, "vs_suit_"..k )
+        scripted_ents.Register( ENT, string.lower(string.Replace(k," ","_")) )
     end
     if CLIENT then RunConsoleCommand( "spawnmenu_reload" ) end
-end
+end VectivusSuits.GenerateSuits()
 
 player = player or {}
 local player_GetAllSuits = {}

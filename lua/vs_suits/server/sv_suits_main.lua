@@ -1,20 +1,16 @@
 
 resource.AddWorkshop("3048032975")
 
-function VectivusSuits.FormatKey( str )
-    str = str or ""
-    return string.lower(string.Replace(str," ","_"))
-end
 function VectivusSuits.CreateSuit( k, t )
     timer.Simple( 0, function()
         t.name = k
-        VectivusSuits.Suits[VectivusSuits.FormatKey(k)] = t
+        VectivusSuits.Suits[k] = t
         VectivusSuits.GenerateSuits()
     end )
 end
 function VectivusSuits.CreateSuitAbility( k, t )
     t.name = k
-    VectivusSuits.Abilities[VectivusSuits.FormatKey(k)] = t
+    VectivusSuits.Abilities[k] = t
 end
 
 util.AddNetworkString( "vs.suits" )
@@ -54,17 +50,21 @@ function VectivusSuits.SetPlayerAbilityCooldown( p, i, v )
     p:SetNWBool( "VectivusSuits.Ability.Cooldown."..tostring(i), v )
 end
 
-function VectivusSuits.SpawnSuit( p, k ) // player, suitkey, hasdata
-    if !IsValid(p) or !p:IsPlayer() then return end
-    if !VectivusSuits.GetSuitData(k) then return end
+function VectivusSuits.SpawnSuit( p, k )
+    if !IsValid(p) or !VectivusSuits.GetSuitData(k) then return end
     local trace = {}
-    trace.start = p:EyePos()
-    trace.endpos = trace.start+p:GetAimVector()*90
-    trace.filter = p
-    local tr = util.TraceLine( trace )
+    do // trace
+        trace.start = p:EyePos()
+        trace.endpos = trace.start+p:GetAimVector()*90
+        trace.filter = p
+    end
+    local tr = util.TraceLine(trace)
+
     local e = ents.Create( "vs_suit_base" )
-    e:SetPos( tr.HitPos )
+    if !IsValid(e) then return end
+    e:SetPos(tr.HitPos)
     e:Spawn()
+
     if VectivusSuits.GetPlayerSuit(p) then
         for kk, v in pairs(VectivusSuits.GetVar(p)) do
             e["Set"..kk](e,v)
@@ -77,21 +77,12 @@ function VectivusSuits.SpawnSuit( p, k ) // player, suitkey, hasdata
         e:SetSuitArmor(t.armor)
     end
     hook.Run( "VectivusSuits.SpawnedSuit", p, k )
+
     return e
 end
-concommand.Add( "vs.suit.givesuit", function( p, _, t )
-    if p != NULL then return end
-    local sid64 = t[1]
-    local suit = tostring( t[2] or "" )
-    suit = string.StartsWith(suit,"vs_suit_") and string.Replace(suit,"vs_suit_","")
-    local pp = player.GetBySteamID64(sid64)
-    if !pp then return end
-    VectivusSuits.SpawnSuit( pp, suit )
-end )
 
 function VectivusSuits.EquipSuit( p, k, e )
     if !IsValid(p) or !p:IsPlayer() then return end
-    k = VectivusSuits.FormatKey(k)
     local t = VectivusSuits.GetSuitData( k )
     e = IsValid( e ) and e or nil
     if e then SafeRemoveEntity( e ) end

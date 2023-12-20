@@ -30,15 +30,22 @@ function ENT:SetupDataTables()
 	self:NetworkVar( "String", 1, "Suit" )
 	self:NetworkVar( "Int", 2, "SuitHealth" )
 	self:NetworkVar( "Int", 3, "SuitArmor" )
+	if SERVER then
+		self:SetSuit("")
+		self:SetSuitHealth(0)
+		self:SetSuitArmor(0)
+	end
 end
 
 if CLIENT then return end
 function ENT:SpawnFunction( _, tr, class )
-	if ( !tr.Hit ) then return end
-	local SpawnPos = tr.HitPos + tr.HitNormal * 55
-	local e = ents.Create( class )
+	if !tr.Hit then return end
+	local SpawnPos = tr.HitPos + tr.HitNormal * 33
+
+	local e = ents.Create(class)
 	e:SetPos( SpawnPos )
 	e:Spawn()
+
 	return e
 end
 function ENT:Initialize()
@@ -50,6 +57,7 @@ function ENT:Initialize()
     if IsValid( self:GetPhysicsObject() ) then
         self:GetPhysicsObject():Wake()
     end
+	self:SetSuit(self.PrintName)
 end
 function ENT:Use( p )
     if self.USED then return end
