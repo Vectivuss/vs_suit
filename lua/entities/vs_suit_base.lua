@@ -57,7 +57,12 @@ function ENT:Initialize()
     if IsValid( self:GetPhysicsObject() ) then
         self:GetPhysicsObject():Wake()
     end
+	local data = VectivusSuits.GetSuitData(self.PrintName)
+	if !data then return end
+
 	self:SetSuit(self.PrintName)
+	self:SetSuitHealth(data.health)
+	self:SetSuitArmor(data.armor)
 end
 function ENT:Use( p )
     if self.USED then return end

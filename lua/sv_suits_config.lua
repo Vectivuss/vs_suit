@@ -53,6 +53,7 @@ VectivusSuits.CreateSuitAbility( "Sonic", {
     end,
     OnEnd = function( p ) // player, ran once ability finishes
         local t = VectivusSuits.GetPlayerSuitTable( p )
+        if !t then return end
         p:SetRunSpeed( t.speed )
     end,
 } )
@@ -111,6 +112,7 @@ VectivusSuits.CreateSuitAbility( "Regeneration", {
         timer.Create( "vs_suits.Regeneration."..tostring(p), .8, 1, function()
             local ap = VectivusSuits.GetVar( p )["SuitArmor"] or 0
             local t = VectivusSuits.GetPlayerSuitTable( p )
+            if !t then return end
             VectivusSuits.SetVar( p, "SuitArmor", math.Clamp( ap+15, 0, (t.armor or 100) ) )
         end )
     end,

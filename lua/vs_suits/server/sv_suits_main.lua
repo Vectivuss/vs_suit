@@ -138,11 +138,24 @@ end
 hook.Add( "PlayerSpawn", "VectivusSuits.RemoveSuit", VectivusSuits.RemoveSuit )
 hook.Add( "PlayerDeath", "VectivusSuits.RemoveSuit", VectivusSuits.RemoveSuit )
 
+hook.Add( "VectivusSuits.OnRemovedSuit", "a", function( p, k )
+    do // remove active abiities
+        p.vs_suit_ability_start = p.vs_suit_ability_start or {}
+        p.vs_suit_ability_end = p.vs_suit_ability_end or {}
+        for ability, _ in pairs( p.vs_suit_ability_start ) do
+            VectivusSuits.SetPlayerAbilities( p, ability, 0 )
+            VectivusSuits.SetPlayerAbilityCooldown( p, ability, false )
+            -- local t = VectivusSuits.Abilities[ability]
+            -- if t.OnEnd then print(p) t.OnEnd(p) end
+        end
+    end
+end )
+
 function VectivusSuits.DropSuit( p, txt )
     if !IsValid(p) or !p:IsPlayer() then return end
-    local k = VectivusSuits.GetPlayerSuit( p )
-    if !k then return end
     if !VectivusSuits.Config.DropSuit[txt or ""] then return end
+    local k = VectivusSuits.GetPlayerSuit(p)
+    if !k then return end
     if hook.Run( "VectivusSuits.CanDropSuit", p ) == false then return "" end
     p.vs_suit_drop = true
     p:SetNWFloat( "VectivusSuits.DropSuitEnd", CurTime()+4 )

@@ -43,7 +43,6 @@ local function _SharedAbilityInfo( i, x, y, w, h )
     local pos = {}
     pos[i] = {x=(xx>=x and xx<=x+w),y=(yy>=y and yy<=y+h),}
 
-
     if pos[i].x and pos[i].y then
         local p, w, h = LocalPlayer(), ScrW(), ScrH()
         if !VectivusSuits.GetPlayerSuit(p) then return end

@@ -61,7 +61,7 @@ function VectivusSuits.SuitAbility( p, k )
                 end
                 do // End
                     timer.Create( "VectivusSuits.Ability"..tostring(ability).."Cooldown."..tostring(p), t.start+(t.cooldown or 0), 1, function()
-                        if !IsValid( p ) then return end
+                        if !IsValid(p) then return end
                         p.vs_suit_ability_end[ability] = nil
                         VectivusSuits.SetPlayerAbilityCooldown( p, ability, false )
                     end )
