@@ -176,6 +176,7 @@ function VectivusSuits.DropSuit( p, txt )
     return ""
 end
 hook.Add( "PlayerSay", "VectivusSuits.DropSuit", VectivusSuits.DropSuit )
+
 hook.Add( "VectivusSuits.CanDropSuit", "a", function( p )
     do // already dropping suit
         if p.vs_suit_drop then return false end
@@ -184,15 +185,21 @@ hook.Add( "VectivusSuits.CanDropSuit", "a", function( p )
         if !p:Alive() then return false end
     end
 end )
+
 function VectivusSuits.OnTakeDamage( e, t )
     local p = IsValid( e ) and e:IsPlayer() and e
     if !IsValid(p) or !p:IsPlayer() then return end
+
     local tt = VectivusSuits.GetVar( p )
     hook.Run( "VectivusSuits.OnTakeDamage", p, t )
+
     local data = VectivusSuits.GetPlayerSuitTable( p )
     if !data then return end
+
     if hook.Run( "VectivusSuits.CanTakeDamage", p, t, data ) == false then t:SetDamage( 0 ) return end
+
     local damage = math.floor( t:GetDamage() )
+
     do // suit damage reduction
         local wep = t:GetAttacker() and IsValid(t:GetAttacker()) and (t:GetAttacker():IsPlayer() or t:GetAttacker():IsNPC()) and (IsValid(t:GetAttacker():GetActiveWeapon()) and t:GetAttacker():GetActiveWeapon():GetClass()) or nil
         if wep and data.weapons then
@@ -200,12 +207,15 @@ function VectivusSuits.OnTakeDamage( e, t )
             damage = math.floor(damage/data.weapons[wep] or 1) 
         end
     end
+
     do // armor
         local ap = tt.SuitArmor
         if ap then
             ap = ap - damage
-            if ap < 0 then
+            if ap <= 0 then
                 ap = 0
+            else
+                damage = 0
             end
             VectivusSuits.SetVar( p, "SuitArmor", ap )
         end
@@ -214,21 +224,27 @@ function VectivusSuits.OnTakeDamage( e, t )
         local hp = tt.SuitHealth
         if hp then
             hp = hp - damage
-            if hp < 0 then
+            if hp <= 0 then
                 hp = 0
                 VectivusSuits.RemoveSuit(p)
                 p:EmitSound("physics/glass/glass_impact_bullet4.wav")
+            else
+                damage = 0
             end
             VectivusSuits.SetVar( p, "SuitHealth", hp )
         end
     end
+
+    t:SetDamage( damage )
 end
 hook.Add( "EntityTakeDamage", "VectivusSuits.OnTakeDamage", VectivusSuits.OnTakeDamage )
+
 hook.Add( "VectivusSuits.CanTakeDamage", "a", function( p, t )
     local inf = t:GetInflictor()
     if t:IsFallDamage() then return false end
     if inf and inf:GetClass() == "prop_physics" then return false end
 end )
+
 hook.Add( "VectivusSuits.OnTakeDamage", "a", function( p, t )
     do // Config OnTakeDamage
         local tt = VectivusSuits.GetPlayerSuitTable( p )
