@@ -1,10 +1,21 @@
 
 VectivusSuits = VectivusSuits or {}
 
+function VectivusSuits.SetPlayerAbilities( p, i, v )
+    if !IsValid(p) or !p:IsPlayer() then return end
+    if !VectivusSuits.GetPlayerSuit( p ) then return end
+    p:SetNWFloat( "VectivusSuits.Ability."..tostring(i), CurTime()+v )
+end
+function VectivusSuits.SetPlayerAbilityCooldown( p, i, v )
+    if !IsValid(p) or !p:IsPlayer() then return end
+    if !VectivusSuits.GetPlayerSuit( p ) then return end
+    p:SetNWBool( "VectivusSuits.Ability.Cooldown."..tostring(i), v )
+end
+
 function VectivusSuits.OnThink()
     if timer.Exists( "VectivusSuits.OnThink" ) then return end
     timer.Create( "VectivusSuits.OnThink", .1, 1, function() end )
-    for _, p in pairs( player.GetAllSuits() ) do
+    for _, p in ipairs( VectivusSuits.GetAllPlayers() ) do
         local t = VectivusSuits.GetPlayerSuitTable(p)
         do // Config OnThink
             if t and t.OnThink then t.OnThink( p, t ) end
@@ -51,19 +62,19 @@ function VectivusSuits.SuitAbility( p, k )
                     VectivusSuits.SetPlayerAbilities( p, ability, t.start )
                     p:EmitSound( "buttons/button15.wav", 50, math.random(90,110), .2 )
                     timer.Create( "VectivusSuits.Ability"..tostring(ability).."End."..tostring(p), (t.start or 0), 1, function()
-                        if !IsValid(p) then return end
+                        if !IsValid(p) or !p.vs_suit_ability_start then return end
                         VectivusSuits.SetPlayerAbilities( p, ability, t.cooldown )
-                        p.vs_suit_ability_start[ability] = nil
-                        p.vs_suit_ability_end[ability] = true
                         VectivusSuits.SetPlayerAbilityCooldown( p, ability, true )
                         if t.OnEnd then t.OnEnd( p ) end
+                        p.vs_suit_ability_start[ability] = nil
+                        p.vs_suit_ability_end[ability] = true
                     end )
                 end
                 do // End
                     timer.Create( "VectivusSuits.Ability"..tostring(ability).."Cooldown."..tostring(p), t.start+(t.cooldown or 0), 1, function()
-                        if !IsValid(p) then return end
-                        p.vs_suit_ability_end[ability] = nil
+                        if !IsValid(p) or !p.vs_suit_ability_end then return end
                         VectivusSuits.SetPlayerAbilityCooldown( p, ability, false )
+                        p.vs_suit_ability_end[ability] = nil
                     end )
                 end
             end
@@ -71,3 +82,22 @@ function VectivusSuits.SuitAbility( p, k )
     end
 end
 hook.Add( "PlayerButtonDown", "VectivusSuits.SuitAbility", VectivusSuits.SuitAbility )
+
+hook.Add( "VectivusSuits.OnDeath", "a", function( p, t )
+    do // remove active abiities
+        p.vs_suit_ability_start = p.vs_suit_ability_start or {}
+        p.vs_suit_ability_end = p.vs_suit_ability_end or {}
+
+        local t = {}
+        table.Merge(t,p.vs_suit_ability_start)
+        table.Merge(t,p.vs_suit_ability_end)
+
+        for i=1, 3 do
+            for ability, _ in pairs( t ) do
+                VectivusSuits.SetPlayerAbilities( p, ability, 0 )
+                VectivusSuits.SetPlayerAbilityCooldown( p, ability, false )
+            end
+        end
+        p.vs_suit_ability_start, p.vs_suit_ability_end = nil, nil
+    end
+end )

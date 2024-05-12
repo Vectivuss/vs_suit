@@ -12,6 +12,9 @@ timer.Simple(1, VectivusSuits.SyncSuitData) -- IGNORE
 // Developed by Vectivus:
 // http://steamcommunity.com/profiles/76561198371018204
 
+// Documentation:
+// http://vectivuss-organization.gitbook.io/vectivus-suits
+
 //////////////////////////////////////////////////////////////////////////////////
 
 // How do i find keybinds? binds here https://wiki.facepunch.com/gmod/Enums/KEY
@@ -30,12 +33,6 @@ VectivusSuits.CreateSuit( "Test Suit", {
         ["Regeneration"] = KEY_B,
         ["AntMan"] = KEY_N,
     },
-    OnEquip = function( p ) // player(self)
-
-    end,
-    OnRemove = function( p ) // player(self)
-
-    end,
 } )
 
 

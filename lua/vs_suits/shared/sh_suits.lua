@@ -54,21 +54,8 @@ function VectivusSuits.GenerateSuits()
         ENT.PrintName = t.name
         ENT.Category = "Vectivus´s Suits"
         ENT.Spawnable = true
+        if SERVER then ENT.Suit = k end
         scripted_ents.Register( ENT, string.lower(string.Replace(k," ","_")) )
     end
     if CLIENT then RunConsoleCommand( "spawnmenu_reload" ) end
 end VectivusSuits.GenerateSuits()
-
-player = player or {}
-local player_GetAllSuits = {}
-function player.GetAllSuits()
-    if timer.Exists( "player_GetAllSuits" ) then return player_GetAllSuits end
-    timer.Create( "player_GetAllSuits", .1, 1, function() end )
-    player_GetAllSuits = {}
-    table.Empty( player_GetAllSuits )
-    for _, p in pairs(player.GetAll()) do
-        if !VectivusSuits.GetPlayerSuit(p) then continue end
-        table.insert(player_GetAllSuits,p)
-    end
-    return player_GetAllSuits
-end

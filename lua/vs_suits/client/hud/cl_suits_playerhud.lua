@@ -61,7 +61,7 @@ local function _SharedAbilityInfo( i, x, y, w, h )
         for _, v in pairs( words ) do
             lines[lineIndex] = lines[lineIndex] or ""
             lines[lineIndex] = lines[lineIndex] .. " " .. v
-            if string.len( lines[lineIndex] ) > 50 then 
+            if string.len( lines[lineIndex] ) > 60 then 
                 lineIndex=lineIndex+1
                 H = H + h*.01
             end
@@ -108,12 +108,15 @@ function VectivusSuits.HUDStats()
 
     local tW = surface.GetTextSize( name..txt )
     draw.RoundedBox( 0, x, (y-H/2), tW+(w*.016), H, VectivusSuits.Config.SuitHUD_Background or VectivusSuits.Colors["black01"] )
+
     local w, y = x+(w*.003), (y-H/2)+(h*.015)
     local ww, yy = draw.SimpleText( name, "vs.suits.uib.22", w, (y-H/2)+y/2, VectivusSuits.Config.SuitHUD_Name or VectivusSuits.Colors["green01"], 0, 1 )
     w=w+ww+(w*.1)
+
     surface.SetDrawColor(VectivusSuits.Colors["white01"])
     surface.DrawRect( w+(w*.05), y-(h*.01), W*.012, H-(h*.01) )
     w=w+W*.04
+
     draw.SimpleText( txt, "vs.suits.uib.22", w, (y-H/2)+y/2, VectivusSuits.Config.SuitHUD_Text or VectivusSuits.Colors["white03"], 0, 1 )
 end
 
@@ -152,12 +155,14 @@ function VectivusSuits.HUDDropSuit()
 
     draw.SimpleText( VectivusSuits.Language["SuitDrop"], "vs.suits.ui.24", xx+(ww*.52), yy-(h*.02), VectivusSuits.Colors["white"], 1, 1 )
     draw.SimpleText( i.."s", "vs.suits.ui.24", xx+(ww*.52), yy+(h*.03), VectivusSuits.Colors["white"], 1, 1 )
+
     draw.RoundedBox( 0, xx, yy, ww, hh, VectivusSuits.Colors["black02"] )
 
     surface.SetDrawColor(VectivusSuits.Colors["white02"])
     surface.SetMaterial(gradient)
     surface.DrawTexturedRect( xx+2, yy+2, (ww-4)*f, hh-4 )
 end
-hook.Add( "DrawOverlay", "VectivusSuits.HUDPaint", function() 
+
+hook.Add( "HUDPaint", "VectivusSuits.HUDPaint", function() 
     VectivusSuits.HUDStats();VectivusSuits.HUDAbility();VectivusSuits.HUDDropSuit() 
 end )

@@ -11,10 +11,7 @@ ITEM:AddEquip(function(_,p,t)
     end;ee:Use(p)
     return true
 end, function(_,p,t)
-    t = t.data or {}
-    local tt = VectivusSuits.GetSuitData( t.Suit or "" )
-    tt = tt.name
-    return !VectivusSuits.GetPlayerSuit(p), tt .. ", already equipped!"
+    return !VectivusSuits.GetPlayerSuit(p), VectivusSuits.GetPlayerSuit(p) .. ", already equipped!"
 end )
 
 ITEM:AddDrop(function(_,_,e,t,_)
@@ -34,8 +31,8 @@ end
 function ITEM:GetName( e )
     local data = e.data or {}
     local t = VectivusSuits.GetSuitData( data["Suit"] )
-    if !t then return end
-    return (t and t.name or "<INVALID>")
+    if !t then return "<INVALID>" end
+    return t.name
 end
 
 ITEM:SetDescription( function( _, e )

@@ -1,12 +1,15 @@
 
-resource.AddWorkshop("3048032975")
+resource.AddWorkshop( "3048032975" )
+
+VectivusSuits.Players = VectivusSuits.Players or {}
+function VectivusSuits.GetAllPlayers()
+    return VectivusSuits.Players
+end
 
 function VectivusSuits.CreateSuit( k, t )
-    timer.Simple( 0, function()
-        t.name = k
-        VectivusSuits.Suits[k] = t
-        VectivusSuits.GenerateSuits()
-    end )
+    t.name = k
+    VectivusSuits.Suits[k] = t
+    VectivusSuits.GenerateSuits()
 end
 function VectivusSuits.CreateSuitAbility( k, t )
     t.name = k
@@ -16,19 +19,22 @@ end
 util.AddNetworkString( "vs.suits" )
 function VectivusSuits.Sync( p )
     if !IsValid(p) or !p:IsPlayer() then return end
-    local s = util.Compress(util.TableToJSON(VectivusLib:SanitizeTable(VectivusSuits.Suits)))
-    local ss = util.Compress(util.TableToJSON(VectivusLib:SanitizeTable(VectivusSuits.Abilities)))
+
+    local s = util.TableToJSON(VectivusLib:SanitizeTable(VectivusSuits.Suits))
+    local ss = util.TableToJSON(VectivusLib:SanitizeTable(VectivusSuits.Abilities))
+
+    local tbl = {suits=s,abilities=ss}
+    tbl = util.Compress( util.TableToJSON(tbl) )
+
     net.Start( "vs.suits" )
-        net.WriteUInt(#s,12)
-        net.WriteData(s,#s)
-        net.WriteUInt(#ss,12)
-        net.WriteData(ss,#ss)
+        net.WriteData( tbl, #tbl )
     net.Send( p )
 end
 hook.Add( "VectivusLib:PlayerInitialSpawn", "VectivusSuits.Sync", VectivusSuits.Sync )
 
 function VectivusSuits.SyncSuitData()
-    for _, p in pairs( player.GetAll() ) do
+    for _, p in ipairs( player.GetAll() ) do
+        VectivusSuits.Sync( p )
         VectivusSuits.Sync( p )
     end
 end
@@ -38,16 +44,6 @@ function VectivusSuits.SetVar( e, k, v )
     t[k] = v
     e.VectivusSuits_Vars = t
     e:SetNWString( "VectivusSuits.Var."..tostring(k), v )
-end
-function VectivusSuits.SetPlayerAbilities( p, i, v )
-    if !IsValid(p) or !p:IsPlayer() then return end
-    if !VectivusSuits.GetPlayerSuit( p ) then return end
-    p:SetNWFloat( "VectivusSuits.Ability."..tostring(i), CurTime()+v )
-end
-function VectivusSuits.SetPlayerAbilityCooldown( p, i, v )
-    if !IsValid(p) or !p:IsPlayer() then return end
-    if !VectivusSuits.GetPlayerSuit( p ) then return end
-    p:SetNWBool( "VectivusSuits.Ability.Cooldown."..tostring(i), v )
 end
 
 function VectivusSuits.SpawnSuit( p, k )
@@ -104,6 +100,7 @@ function VectivusSuits.EquipSuit( p, k, e )
         end
         if t.OnEquip then t.OnEquip( p ) end
     end
+    table.insert( VectivusSuits.Players, p )
     p:SetNWString( "VectivusSuits.PlayerSuit", k )
     hook.Run( "VectivusSuits.OnEquippedSuit", p, k )
 end
@@ -118,6 +115,11 @@ function VectivusSuits.RemoveSuit( p )
     if !IsValid(p) or !p:IsPlayer() then return end
     local t = VectivusSuits.GetPlayerSuitTable( p )
     if !t then return end
+
+    p.vs_suit_drop = nil
+
+    hook.Run( "VectivusSuits.OnRemovedSuit", p )
+
     do // remove stats
         if p:Alive() then
             p:EmitSound("buttons/lever6.wav",50, math.random(90,110), .2 )
@@ -126,27 +128,25 @@ function VectivusSuits.RemoveSuit( p )
             p:SetHealth(100)
             p:SetArmor(0)
             p:SetJumpPower(200)
+        else
+            hook.Run( "VectivusSuits.OnDeath", p, t )
         end
     end
     p:SetNWString( "VectivusSuits.PlayerSuit", "" )
     do // OnRemove func
         if t.OnRemove then t.OnRemove( p ) end
     end
-    hook.Run( "VectivusSuits.OnRemovedSuit", p, k )
-    p.vs_suit_drop = nil
 end
 hook.Add( "PlayerSpawn", "VectivusSuits.RemoveSuit", VectivusSuits.RemoveSuit )
 hook.Add( "PlayerDeath", "VectivusSuits.RemoveSuit", VectivusSuits.RemoveSuit )
 
-hook.Add( "VectivusSuits.OnRemovedSuit", "a", function( p, k )
-    do // remove active abiities
-        p.vs_suit_ability_start = p.vs_suit_ability_start or {}
-        p.vs_suit_ability_end = p.vs_suit_ability_end or {}
-        for ability, _ in pairs( p.vs_suit_ability_start ) do
-            VectivusSuits.SetPlayerAbilities( p, ability, 0 )
-            VectivusSuits.SetPlayerAbilityCooldown( p, ability, false )
-            -- local t = VectivusSuits.Abilities[ability]
-            -- if t.OnEnd then print(p) t.OnEnd(p) end
+hook.Add( "VectivusSuits.OnRemovedSuit", "a", function( p )
+    do // remove from all players tbl
+        local t = VectivusSuits.GetAllPlayers()
+        for i=1, #t do
+            if p == t[i] then
+                table.remove(VectivusSuits.GetAllPlayers(), i)
+            end
         end
     end
 end )
@@ -158,8 +158,8 @@ function VectivusSuits.DropSuit( p, txt )
     if !k then return end
     if hook.Run( "VectivusSuits.CanDropSuit", p ) == false then return "" end
     p.vs_suit_drop = true
-    p:SetNWFloat( "VectivusSuits.DropSuitEnd", CurTime()+4 )
-    timer.Create( "VectivusSuits.DropSuitEnd."..tostring(p), 4, 1, function()
+    p:SetNWFloat( "VectivusSuits.DropSuitEnd", CurTime() + VectivusSuits.Config.DropTime )
+    timer.Create( "VectivusSuits.DropSuitEnd."..tostring(p), VectivusSuits.Config.DropTime, 1, function()
         if !IsValid(p) or !p:IsPlayer() then return end
         if !p.vs_suit_drop then return end
         do // create suit
@@ -190,13 +190,12 @@ function VectivusSuits.OnTakeDamage( e, t )
     local p = IsValid( e ) and e:IsPlayer() and e
     if !IsValid(p) or !p:IsPlayer() then return end
 
-    local tt = VectivusSuits.GetVar( p )
-    hook.Run( "VectivusSuits.OnTakeDamage", p, t )
-
     local data = VectivusSuits.GetPlayerSuitTable( p )
     if !data then return end
 
     if hook.Run( "VectivusSuits.CanTakeDamage", p, t, data ) == false then t:SetDamage( 0 ) return end
+
+    local tt = VectivusSuits.GetVar( p )
 
     local damage = math.floor( t:GetDamage() )
 
@@ -226,8 +225,7 @@ function VectivusSuits.OnTakeDamage( e, t )
             hp = hp - damage
             if hp <= 0 then
                 hp = 0
-                VectivusSuits.RemoveSuit(p)
-                p:EmitSound("physics/glass/glass_impact_bullet4.wav")
+                hook.Run( "VectivusSuits.OnSuitDestroyed", p, data, t )
             else
                 damage = 0
             end
@@ -235,9 +233,14 @@ function VectivusSuits.OnTakeDamage( e, t )
         end
     end
 
-    t:SetDamage( damage )
+    hook.Run( "VectivusSuits.OnTakeDamage", p, t )
 end
 hook.Add( "EntityTakeDamage", "VectivusSuits.OnTakeDamage", VectivusSuits.OnTakeDamage )
+
+hook.Add( "VectivusSuits.OnSuitDestroyed", "a", function( p, data, t )
+    p:EmitSound( "physics/glass/glass_impact_bullet4.wav" )
+    VectivusSuits.RemoveSuit( p )
+end )
 
 hook.Add( "VectivusSuits.CanTakeDamage", "a", function( p, t )
     local inf = t:GetInflictor()

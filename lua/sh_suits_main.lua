@@ -15,13 +15,15 @@ VectivusSuits.Config = VectivusSuits.Config or {}
 // The language: en, more in the future!
 VectivusSuits.Config.Language = "en"
 
+// How long it takes for the player to drop their suit ( in seconds )
+VectivusSuits.Config.DropTime = 4
+
 VectivusSuits.Config.DropSuit = { // Chat Commands used to drop/unequip the armor suit
     ["/dropsuit"] = true,
     ["!dropsuit"] = true,
     ["/suitdrop"] = true,
     ["!suitdrop"] = true,
 }
-
 
 // Background colour of the suit HUD
 VectivusSuits.Config.SuitHUD_Background = Color(0,0,0,215)

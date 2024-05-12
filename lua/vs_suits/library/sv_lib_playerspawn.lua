@@ -6,13 +6,9 @@
 
 VectivusLib = VectivusLib or {}
 
-hook.Add( "PlayerSpawn", "VectivusLib.PlayerInitialSpawn", function( p )
-    if p.VectivusLib_PlayerInitialSpawn then return end
-    p.VectivusLib_PlayerInitialSpawn = true
-	hook.Add( "SetupMove", p, function( self, pl, _, cmd )
-		if self == pl and not cmd:IsForced() then
-			hook.Run( "VectivusLib:PlayerInitialSpawn", self )
-			hook.Remove( "SetupMove", self )
-		end
-	end )
+gameevent.Listen( "player_activate" )
+hook.Add( "player_activate", "VectivusLib.PlayerInitialSpawn", function( data )
+	local p = Player(data.userid)
+	if !p:IsValid(p) or !p:IsPlayer() then return end
+	hook.Run( "VectivusLib:PlayerInitialSpawn", p )
 end )

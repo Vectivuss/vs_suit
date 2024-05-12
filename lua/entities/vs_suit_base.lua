@@ -41,9 +41,10 @@ if CLIENT then return end
 function ENT:SpawnFunction( _, tr, class )
 	if !tr.Hit then return end
 	local SpawnPos = tr.HitPos + tr.HitNormal * 33
+	local e = ents.Create("vs_suit_base")
 
-	local e = ents.Create(class)
-	e:SetPos( SpawnPos )
+	if self.Suit then e:SetSuit(self.Suit) end
+	e:SetPos(SpawnPos)
 	e:Spawn()
 
 	return e
@@ -57,10 +58,10 @@ function ENT:Initialize()
     if IsValid( self:GetPhysicsObject() ) then
         self:GetPhysicsObject():Wake()
     end
-	local data = VectivusSuits.GetSuitData(self.PrintName)
+
+	local data = VectivusSuits.GetSuitData(self:GetSuit())
 	if !data then return end
 
-	self:SetSuit(self.PrintName)
 	self:SetSuitHealth(data.health)
 	self:SetSuitArmor(data.armor)
 end
