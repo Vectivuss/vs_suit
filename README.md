@@ -16,6 +16,9 @@ This a small comparision to VS Suits to Armor6 and since it's no longer updated 
 | [Xenin inventory](https://www.gmodstore.com/market/view/xenin-inventory) | ✔️ | ❌ |
 | [Brick's Essentials](https://www.gmodstore.com/market/view/bricks-essentials) | ✔️ | ❌ |
 
+## Addon Documentation
+https://vectivuss-organization.gitbook.io/vectivus-suits
+
 ## How do i create armor?
 You will require some basic gLua knowledge in order to fully create suits however if you wish to make ones that only affect: Health, Armor, Movement then gLua knowledge isn't required. A 'test armor' has been left in the configuration file with some advanced features already present for those who know what they're doing
 ```lua
