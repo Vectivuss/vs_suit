@@ -1,8 +1,6 @@
 
-VectivusSuits = VectivusSuits or {} -- IGNORE
-VectivusSuits.Suits = VectivusSuits.Suits or {} -- IGNORE
-VectivusSuits.Abilities = VectivusSuits.Abilities or {} -- IGNORE
-timer.Simple(1, VectivusSuits.SyncSuitData) -- IGNORE
+timer.Simple( 0, VectivusSuits.SyncSuitData )
+
 //////////////////////////////////////////////////////////////////////////////////
 
 // Version: 1.0.0
@@ -17,9 +15,11 @@ timer.Simple(1, VectivusSuits.SyncSuitData) -- IGNORE
 
 //////////////////////////////////////////////////////////////////////////////////
 
+local Suits = VectivusSuits
+
 // How do i find keybinds? binds here https://wiki.facepunch.com/gmod/Enums/KEY
 
-VectivusSuits.CreateSuit( "Test Suit", {
+Suits.CreateSuit( "Test Suit", {
     model = "models/player/corpse1.mdl",
     health = 300,
     armor = 100,
@@ -29,18 +29,17 @@ VectivusSuits.CreateSuit( "Test Suit", {
         ["weapon_rpg"] = 1.4 -- 40% reduction to dmg
     },
     abilities = { // [abilitykey] = KeyBind
-        ["Sonic"] = KEY_V,
+        ["Juggernaut"] = KEY_V,
         ["Regeneration"] = KEY_B,
         ["AntMan"] = KEY_N,
     },
 } )
 
-
 /////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Suit Ability Config /////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
 
-VectivusSuits.CreateSuitAbility( "Sonic", {
+Suits.CreateSuitAbility( "Sonic", {
     desc = "Gains a 50% speed boost allowing you to catch up to people or escape from danger",
     start = 2, // how long ability lasts ( float )
     cooldown = 6, // how long the cooldown lasts ( starts after ability ends )
@@ -49,23 +48,25 @@ VectivusSuits.CreateSuitAbility( "Sonic", {
         p:SetRunSpeed( p:GetRunSpeed() * 1.5 )
     end,
     OnEnd = function( p ) // player, ran once ability finishes
-        local t = VectivusSuits.GetPlayerSuitTable( p )
+        local t = Suits.GetPlayerSuitTable( p )
         if !t then return end
         p:SetRunSpeed( t.speed )
     end,
 } )
 
-VectivusSuits.CreateSuitAbility( "Juggernaut", {
+Suits.CreateSuitAbility( "Juggernaut", {
     desc = "This provides 40% damage resistance from ALL types of damage",
     start = 4,
     cooldown = 20,
     color = Color(135, 241, 241),
     OnAttacked = function( p, att, t ) // victim, attacker, CTakeDamageInfo
         t:SetDamage( t:GetDamage() / 1.4 )
+
+        print( "debug", p, att, t )
     end,
 } )
 
-VectivusSuits.CreateSuitAbility( "AntMan", {
+Suits.CreateSuitAbility( "AntMan", {
     desc = "Shrinks you down to the size of an ant making it harder for opponents to hit you",
     start = 5,
     cooldown = 30,
@@ -84,7 +85,7 @@ VectivusSuits.CreateSuitAbility( "AntMan", {
     end,
 } )
 
-VectivusSuits.CreateSuitAbility( "Invisibility", {
+Suits.CreateSuitAbility( "Invisibility", {
     desc = "Turns your transparent making you somewhat invisible to others",
     start = 6,
     cooldown = 17,
@@ -99,7 +100,7 @@ VectivusSuits.CreateSuitAbility( "Invisibility", {
     end,
 } )
 
-VectivusSuits.CreateSuitAbility( "Regeneration", {
+Suits.CreateSuitAbility( "Regeneration", {
     desc = "Gains suit 15AP every 0.8s however WONT exceed the suits max armor",
     start = 4,
     cooldown = 20,
@@ -107,10 +108,10 @@ VectivusSuits.CreateSuitAbility( "Regeneration", {
     OnThink = function( p )
         if timer.Exists( "vs_suits.Regeneration."..tostring(p) ) then return end
         timer.Create( "vs_suits.Regeneration."..tostring(p), .8, 1, function()
-            local ap = VectivusSuits.GetVar( p )["SuitArmor"] or 0
-            local t = VectivusSuits.GetPlayerSuitTable( p )
+            local ap = Suits.GetVar( p )["SuitArmor"] or 0
+            local t = Suits.GetPlayerSuitTable( p )
             if !t then return end
-            VectivusSuits.SetVar( p, "SuitArmor", math.Clamp( ap+15, 0, (t.armor or 100) ) )
+            Suits.SetVar( p, "SuitArmor", math.Clamp( ap+15, 0, (t.armor or 100) ) )
         end )
     end,
 } )

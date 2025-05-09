@@ -1,6 +1,4 @@
 
-VectivusSuits = VectivusSuits or {}
-VectivusSuits.Config = VectivusSuits.Config or {}
 //////////////////////////////////////////////////////////////////////////////////
 
 // Version 1.0.0
@@ -19,10 +17,10 @@ VectivusSuits.Config.Language = "en"
 VectivusSuits.Config.DropTime = 4
 
 VectivusSuits.Config.DropSuit = { // Chat Commands used to drop/unequip the armor suit
-    ["/dropsuit"] = true,
-    ["!dropsuit"] = true,
-    ["/suitdrop"] = true,
-    ["!suitdrop"] = true,
+    [ "/dropsuit" ] = true,
+    [ "!dropsuit" ] = true,
+    [ "/suitdrop" ] = true,
+    [ "!suitdrop" ] = true,
 }
 
 // Background colour of the suit HUD

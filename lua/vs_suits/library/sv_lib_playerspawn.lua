@@ -1,18 +1,11 @@
 
---[[------------------------------------------
-    @ Lib       » PlayerInitialSpawn
-    @ Author    » Vectivus
---------------------------------------------]]
+gameevent.Listen( "player_activate" )
 
-VectivusLib = VectivusLib or {}
+hook.Add( "player_activate", "VectivusLib:PlayerFullySpawned", function( data )
+    local p = Player( data.userid )
 
-hook.Add( "PlayerSpawn", "VectivusLib.PlayerInitialSpawn", function( p )
-    if p.VectivusLib_PlayerInitialSpawn then return end
-    p.VectivusLib_PlayerInitialSpawn = true
-	hook.Add( "SetupMove", p, function( self, pl, _, cmd )
-		if self == pl and not cmd:IsForced() then
-			hook.Run( "VectivusLib:PlayerInitialSpawn", self )
-			hook.Remove( "SetupMove", self )
-		end
-	end )
+    timer.Simple( 1, function( )
+        if not IsValid( p ) or not p:IsPlayer( ) or p:IsBot( ) then return end
+        hook.Run( "VectivusLib:PlayerFullySpawned", p )
+    end )
 end )
