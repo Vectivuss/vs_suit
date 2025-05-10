@@ -74,7 +74,7 @@ function Suits.SuitAbility( p, k )
 
                 do // Start
                     p.vss_ability_start[ ability ] = true
-                    if t.OnActive then t.OnActive( p ) end
+                    if t.OnActive then t.OnActive( p, t ) end
 
                     Suits.SetPlayerAbilities( p, ability, t.start )
 
@@ -86,7 +86,7 @@ function Suits.SuitAbility( p, k )
                         Suits.SetPlayerAbilities( p, ability, t.cooldown )
                         Suits.SetPlayerAbilityCooldown( p, ability, true )
 
-                        if t.OnEnd then t.OnEnd( p ) end
+                        if t.OnEnd then t.OnEnd( p, t ) end
 
                         p.vss_ability_start[ ability ] = nil
                         p.vss_ability_end[ ability ] = true

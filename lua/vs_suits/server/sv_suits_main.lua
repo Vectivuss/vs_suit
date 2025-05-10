@@ -122,7 +122,7 @@ function Suits.EquipSuit( p, k, e )
             e:Use( p )
         end
 
-        if t.OnEquip then t.OnEquip( p ) end
+        if t.OnEquip then t.OnEquip( t, p ) end
     end
 
     p:SetNWString( "VectivusSuits.PlayerSuit", k )
@@ -164,7 +164,7 @@ function Suits.RemoveSuit( p )
 
     p:SetNWString( "VectivusSuits.PlayerSuit", "" )
 
-    if t.OnRemove then t.OnRemove( p ) end
+    if t.OnRemove then t.OnRemove( t, p ) end
 end
 
 hook.Add( "PlayerSpawn", "VectivusSuits.RemoveSuit", Suits.RemoveSuit )
@@ -230,7 +230,7 @@ function Suits.OnTakeDamage( e, t )
     local damage = t:GetDamage( )
 
     do // suit damage reduction
-        local wep = t:GetWeapon( ) and t:GetWeapon( ):GetClass( )
+        local wep = IsValid( t:GetWeapon( ) ) and t:GetWeapon( ):GetClass( )
         if wep and data.weapons then
             local Int = data.weapons[ wep ] or 0
             damage = math.floor( damage * ( 1 - ( Int / 100 ) ) )
@@ -281,7 +281,7 @@ end )
 hook.Add( "VectivusSuits.OnTakeDamage", "a", function( p, t )
     do // Config OnTakeDamage
         local tt = Suits.GetPlayerSuitTable( p )
-        if tt and tt.OnTakeDamage then tt.OnTakeDamage( p, t ) end
+        if tt and tt.OnTakeDamage then tt.OnTakeDamage( tt, p, t ) end
     end
 
     do // prevent suit dropping
