@@ -233,7 +233,7 @@ function Suits.OnTakeDamage( e, t )
         local wep = t:GetWeapon( ) and t:GetWeapon( ):GetClass( )
         if wep and data.weapons then
             local Int = data.weapons[ wep ] or 1
-            damage = math.floor( damage * ( Int / 100 ) )
+            damage = math.floor(damage * (1 - ((data.weapons[wep] or 0) / 100)))
         end
     end
 
