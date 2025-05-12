@@ -70,8 +70,6 @@ function ENT:SpawnFunction( _, tr, class )
 end
 
 function ENT:Initialize( )
-	print( "debug", self, self:GetSuit( ) )
-
 	if self:GetSuit( ) == "" then
 		local Get = VectivusSuits.GetSuitByClass( self:GetClass( ) )
 		if not Get then return end

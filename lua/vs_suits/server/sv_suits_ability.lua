@@ -104,7 +104,6 @@ function Suits.SuitAbility( p, k )
             end
         end
     end
-
 end
 
 hook.Add( "PlayerButtonDown", "VectivusSuits.SuitAbility", VectivusSuits.SuitAbility )

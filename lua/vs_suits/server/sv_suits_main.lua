@@ -51,8 +51,8 @@ do
             self.Data.abilities = Tbl
         end,
 
-        OnTakeDamage = function( self, ply, dmg )
-            self.Data.OnTakeDamage( self, ply, dmg )
+        OnTakeDamage = function( self, Func )
+            self.Data.OnTakeDamage = Func
         end,
 
         OnEquip = function( self, Func )
@@ -213,8 +213,6 @@ function Suits.SpawnSuit( p, k )
         for kk, v in pairs( Suits.GetVar( p ) ) do
             e[ "Set" .. kk ]( e, v )
             Suits.SetVar( p, kk, nil )
-
-            print( kk, v )
         end
     else
         local t = Suits.GetSuit( k )
@@ -255,9 +253,6 @@ function Suits.EquipSuit( p, k, e )
 
         if e then
             for k, v in pairs( e:GetNetworkVars( ) or { } ) do
-
-                print( e, k, v )
-
                 Suits.SetVar( p, k, v )
             end
         else
