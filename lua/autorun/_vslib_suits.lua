@@ -43,6 +43,8 @@ local function Initialize( )
     LoadDirectory( "vs_suits" )
 
     LoadFile( nil, "sv_suits_config.lua" )
+
+    hook.Run( "VectivusSuits:OnLoaded" )
 end
 
 timer.Simple( 0, Initialize )

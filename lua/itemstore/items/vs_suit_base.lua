@@ -4,43 +4,55 @@ ITEM.Stackable = false
 ITEM.DropStack = false
 ITEM.Base = "base_darkrp"
 
-function ITEM:GetName()
+function ITEM:GetName( )
     local k = self:GetData( "Suit" )
-    local t = VectivusSuits.GetSuitData( k )
-    return (t and t.name or "<INVALID>")
+    local t = VectivusSuits.GetSuit( k )
+    return ( t and t.name or "<INVALID>" )
 end
-function ITEM:GetDescription()
+
+function ITEM:GetDescription( )
     local k = self:GetData( "Suit" )
-    local t = VectivusSuits.GetSuitData( k )
-    if !t then return end
+
+    local t = VectivusSuits.GetSuit( k )
+    if not t then return end
+
     local health = self:GetData( "SuitHealth" )
     local armor = self:GetData( "SuitArmor" )
+
     return t.name .. "\n\n" .. "Health: " .. health .. "\n" .. "Armor: " .. armor
 end
+
 function ITEM:Use( p )
-    if DarkRP and p:isArrested() or VectivusSuits.GetPlayerSuit(p) then return false end
-    local e = ents.Create( "vs_suit_base" )
-    e:Spawn()
-    e:SetSuit( self:GetData( "Suit" ) )
-    e:SetSuitHealth( self:GetData( "SuitHealth" ) )
-    e:SetSuitArmor( self:GetData( "SuitArmor" ) )
-    e:Use(p)
+    if DarkRP and p:isArrested( ) or p:GetSuit( ) then return false end
+
+    local Ent = ents.Create( "vs_suit_base" )
+
+    Ent:SetSuit( self:GetData( "Suit" ) )
+    Ent:SetSuitHealth( self:GetData( "SuitHealth" ) )
+    Ent:SetSuitArmor( self:GetData( "SuitArmor" ) )
+    Ent:Spawn( )
+
+    Ent:Use( p )
+
     return true
 end
 
-function ITEM:CanPickup( p, e )
+function ITEM:CanPickup( p, Ent )
 	return true
 end
-function ITEM:CanMerge( e )
+
+function ITEM:CanMerge( Ent )
 	return false
 end
-function ITEM:SaveData( e )
-    for k, v in pairs( e:GetNetworkVars() or {} ) do
+
+function ITEM:SaveData( Ent )
+    for k, v in pairs( Ent:GetNetworkVars( ) or { } ) do
         self:SetData( k, v )
     end
 end
-function ITEM:LoadData( e )
-    e:SetSuit( self:GetData( "Suit" ) )
-    e:SetSuitHealth( self:GetData( "SuitHealth" ) )
-    e:SetSuitArmor( self:GetData( "SuitArmor" ) )
+
+function ITEM:LoadData( Ent )
+    Ent:SetSuit( self:GetData( "Suit" ) )
+    Ent:SetSuitHealth( self:GetData( "SuitHealth" ) )
+    Ent:SetSuitArmor( self:GetData( "SuitArmor" ) )
 end

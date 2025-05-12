@@ -10,8 +10,8 @@
 
 //////////////////////////////////////////////////////////////////////////////////
 
-// The language: en, more in the future!
-VectivusSuits.Config.Language = "en"
+// When you drop an equipped suit it will reset HP and AP to default values
+VectivusSuits.Config.AutoDropRepar = false
 
 // How long it takes for the player to drop their suit ( in seconds )
 VectivusSuits.Config.DropTime = 4

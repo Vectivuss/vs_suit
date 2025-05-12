@@ -1,20 +1,14 @@
 
 net.Receive( "vs.suits", function( len )
     local data = net.ReadData( len )
-    data = util.Decompress(data)
-    data = util.JSONToTable( data or "" ) or {}
+    data = util.Decompress( data )
+    data = util.JSONToTable( data or "" ) or { }
 
-    do // Suit Data
-        local suits = util.JSONToTable( data.suits or "" ) or {}
-        VectivusSuits.Suits = suits
-    end
+    local suits = util.JSONToTable( data.suits or "" ) or { }
+    local abilities = util.JSONToTable( data.abilities or "" ) or { }
 
-    do // Suit Ability Data
-        local abilities = util.JSONToTable( data.abilities or "" ) or {}
-        VectivusSuits.Abilities = abilities
-    end
+    VectivusSuits.Suits = suits
+    VectivusSuits.Abilities = abilities
 
-    do // Populate SpawnMenu, Suit ENTs
-        VectivusSuits.GenerateSuits()
-    end
+    VectivusSuits.GenerateSuits( )
 end )

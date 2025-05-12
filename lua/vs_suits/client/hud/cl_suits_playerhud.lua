@@ -21,24 +21,25 @@ VectivusSuits.Colors = {
 }
 
 local function _SharedAbilityPaint( i, x, y, w, h )
-    local abilityTbl = VectivusSuits.GetPlayerSuitTable( p ).abilities
+    local abilityTbl = p:GetSuitTable( ).abilities
+
     local bind = abilityTbl[ i ]
     bind = string.upper( input.GetKeyName( bind ) )
 
-    local k = VectivusSuits.GetAbilityData( i )
+    local k = VectivusSuits.GetAbility( i )
     local cols = k and k.color
     local _i = VectivusSuits.GetPlayerAbilityCooldown( p, i )
     local ii = VectivusSuits.GetPlayerAbilities( p, i ) or 0
     local f = math.Clamp( math.Remap( ii - CurTime( ), 0, 4, 0, 1 ), 0, 1 )
     local b = (ii <= 0 and bind or ii)
 
-    draw.RoundedBox( 6, x, y, w, h, Color(cols.r,cols.g,cols.b) )
+    draw.RoundedBox( 6, x, y, w, h, Color( cols.r, cols.g, cols.b ) )
     draw.RoundedBox( 6, x+2, y+2, w-4, h-4, color_black )
 
     draw.SimpleText( b, (ii>0&&"vs.suits.ui.45"||"vs.suits.ui.50"), x+(w*.5), y+(h*.45), _i and cols or VectivusSuits.Colors[ "white01" ], 1, 1 )
 
-    surface.SetDrawColor(cols.r,cols.g,cols.b,(_i and 70 or 140))
-    surface.SetMaterial(gradientDown)
+    surface.SetDrawColor( cols.r, cols.g, cols.b, ( _i and 70 or 140 ) )
+    surface.SetMaterial( gradientDown )
     surface.DrawTexturedRect( x+2, y+1, w-2, h )
 end
 
@@ -46,14 +47,20 @@ local function _SharedAbilityInfo( i, x, y, w, h )
     local xx, yy = input.GetCursorPos( )
 
     if xx == 0 or yy == 0 then return end
-    local pos = {}
 
-    pos[ i ] = {x=(xx>=x and xx<=x+w),y=(yy>=y and yy<=y+h),}
+    local pos = { }
+
+    pos[ i ] = {
+        x=( xx >= x and xx <= x+w),
+        y=( yy>=y and yy <= y+h) ,
+    }
 
     if pos[ i ].x and pos[ i ].y then
-        if not VectivusSuits.GetPlayerSuit( p ) then return end
-        local abilityTbl = VectivusSuits.GetPlayerSuitTable( p ).abilities
-        local t = VectivusSuits.GetAbilityData( i )
+        if not p:GetSuit( ) then return end
+
+        local abilityTbl = p:GetSuitTable( ).abilities
+
+        local t = VectivusSuits.GetAbility( i )
         if not t then return end
 
         local w, h = ScrW( ), ScrH( )
@@ -67,6 +74,7 @@ local function _SharedAbilityInfo( i, x, y, w, h )
         for _, v in pairs( words ) do
             lines[ lineIndex ] = lines[ lineIndex ] or ""
             lines[ lineIndex ] = lines[ lineIndex ] .. " " .. v
+
             if string.len( lines[ lineIndex ] ) > 60 then 
                 lineIndex = lineIndex + 1
                 H = H + h*.01
@@ -99,7 +107,7 @@ local function _SharedAbilityInfo( i, x, y, w, h )
 end
 
 function VectivusSuits.HUDStats( )
-    local cfg = VectivusSuits.Suits[ VectivusSuits.GetPlayerSuit( p ) ]
+    local cfg = VectivusSuits.Suits[ p:GetSuit( ) ]
     if not cfg then return end
 
     local w, h = ScrW( ), ScrH( )
@@ -127,15 +135,15 @@ function VectivusSuits.HUDStats( )
 
     local tW = surface.GetTextSize( name .. txt )
 
-    draw.RoundedBox( 0, x, (y - H/2), tW+(w*.016), H, VectivusSuits.Config.SuitHUD_Background or VectivusSuits.Colors[ "black01" ] )
+    draw.RoundedBox( 0, x, ( y - H/2 ), tW + ( w*.016 ), H, VectivusSuits.Config.SuitHUD_Background or VectivusSuits.Colors[ "black01" ] )
 
-    local w, y = x + w*.003, (y-H/2) + (h*.015)
+    local w, y = x + w*.003, ( y - H/2 ) + ( h*.015 )
     local ww, yy = draw.SimpleText( name, "vs.suits.uib.22", w, (y-H/2)+y/2, VectivusSuits.Config.SuitHUD_Name or VectivusSuits.Colors[ "green01" ], 0, 1 )
 
-    w= w + ww + (w*.1)
+    w= w + ww + ( w*.1 )
 
     surface.SetDrawColor( VectivusSuits.Colors[ "white01" ] )
-    surface.DrawRect( w+(w*.05), y-(h*.01), W*.012, H-(h*.01) )
+    surface.DrawRect( w +( w*.05 ), y - ( h*.01 ), W*.012, H - ( h*.01 ) )
 
     w = w + W*.04
 
@@ -143,26 +151,22 @@ function VectivusSuits.HUDStats( )
 end
 
 function VectivusSuits.HUDAbility( )
-    if not IsValid( p ) then
-        p = LocalPlayer( )
-    end
-
     local w, h = ScrW( ), ScrH( )
     local x, y, W, H = w/2, h, VectivusLib:Scale( 70 ), VectivusLib:Scale( 65 )
 
-    if not VectivusSuits.GetPlayerSuit( p ) then return end
+    if not p:GetSuit( ) then return end
 
     local cc, xx, yy, ww, hh = x-W/2, 0, y-H-(h*.01), W, H
     local padding = 6
-    local ability = VectivusSuits.GetPlayerSuitAbilityTable( p ) or { }
+    local ability = p:GetSuitAbilities( )
     local abilitiesCount = #ability
 
     xx = xx - abilitiesCount * ww / 2 + W / 2 -padding
 
-    local t = VectivusSuits.GetPlayerSuitTable( p )
+    local t = p:GetSuitTable( )
 
     for k, bind in pairs( t and t.abilities or { } ) do
-        local Abilities = VectivusSuits.GetAbilityData( k )
+        local Abilities = VectivusSuits.GetAbility( k )
         if not Abilities then break end
 
         _SharedAbilityPaint( k, cc+xx, yy, ww, hh )
@@ -175,7 +179,7 @@ function VectivusSuits.HUDDropSuit( )
     local w, h = ScrW( ), ScrH( )
     local x, y, W, H = w/2, h, VectivusLib:Scale( 250 ), VectivusLib:Scale( 16 )
 
-    if not VectivusSuits.GetPlayerSuit( p ) then return end
+    if not p:GetSuit( ) then return end
 
     local i = p:GetNWFloat( "VectivusSuits.DropSuitEnd", 0 )
     local f = math.Clamp( math.Remap( i-CurTime( ), 0, 4, 0, 1 ), 0, 1 )
@@ -196,6 +200,8 @@ function VectivusSuits.HUDDropSuit( )
 end
 
 hook.Add( "HUDPaint", "VectivusSuits.HUDPaint", function( ) 
+    if not IsValid( p ) then p = LocalPlayer( ) end
+
     VectivusSuits.HUDStats( )
     VectivusSuits.HUDAbility( )
     VectivusSuits.HUDDropSuit( ) 

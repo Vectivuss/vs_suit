@@ -5,15 +5,153 @@ util.AddNetworkString( "vs.suits" )
 
 local Suits = VectivusSuits
 
-function Suits.CreateSuit( k, t )
-    t.name = k
-    Suits.Suits[ k ] = t
-    Suits.GenerateSuits( )
+do
+    local Table = { 
+        Data = { 
+            health = 1,
+            armor = 0,
+            speed = 200,
+            jumpPower = 250,
+
+            model = "models/player/corpse1.mdl"
+        },
+
+        SetName = function( self, Title )
+            self.Name = Title
+            self.Data.name = Title
+
+            self.Data.class = string.lower( string.Replace( Title, " ", "_" ) )
+        end,
+
+        SetModel = function( self, Model )
+            self.Data.model = Model
+        end,
+
+        SetHealth = function( self, Int )
+            self.Data.health = Int
+        end,
+
+        SetArmor = function( self, Int )
+            self.Data.armor = Int
+        end,
+
+        SetJumpPower = function( self, Int )
+            self.Data.jumpPower = Int
+        end,
+
+        SetSpeed = function( self, Int )
+            self.Data.speed = Int
+        end,
+
+        SetWeapons = function( self, Tbl )
+            self.Data.weapons = Tbl
+        end,
+
+        Abilities = function( self, Tbl )
+            self.Data.abilities = Tbl
+        end,
+
+        OnTakeDamage = function( self, ply, dmg )
+            self.Data.OnTakeDamage( self, ply, dmg )
+        end,
+
+        OnEquip = function( self, Func )
+            self.Data.OnEquip = Func
+        end,
+
+        OnRemove = function( self, Func )
+            self.Data.OnRemove = Func
+        end,
+
+        Create = function( self )
+            if not self.Name then return end
+
+            local Req = table.Copy( self.Data )
+
+            Suits.Suits[ self.Name ] = Req
+
+            Suits.GenerateSuits( )
+        end
+    }
+
+    Table.__index = Table
+
+    function Suits.Create( )
+        local Call = table.Copy( Table )
+        return setmetatable( { [ 0 ] = 0 }, Call )
+    end
+
+    -- Formally used to create suits, now and alias of `Create`
+    function Suits.CreateSuit( ) return end
 end
 
-function Suits.CreateSuitAbility( k, t )
-    t.name = k
-    Suits.Abilities[ k ] = t
+do
+    local Table = { 
+        Data = {
+            color = color_white,
+            start = 1,
+            cooldown = 2
+        },
+
+        SetName = function( self, Title )
+            self.Name = Title
+            self.Data.name = Title
+        end,
+
+        SetDescription = function( self, Text )
+            self.Data.desc = Text
+        end,
+
+        SetColor = function( self, Col )
+            self.Data.color = Col
+        end,
+
+        SetStart = function( self, Int )
+            self.Data.start = Int
+        end,
+
+        SetCooldown = function( self, Int )
+            self.Data.cooldown = Int
+        end,
+
+        OnActive = function( self, Func )
+            self.Data.OnActive = Func
+        end,
+
+        OnEnd = function( self, Func )
+            self.Data.OnEnd = Func
+        end,
+
+        OnThink = function( self, Func )
+            self.Data.OnThink = Func
+        end,
+
+        OnAttacked = function( self, Func )
+            self.Data.OnAttacked = Func
+        end,
+
+        OnAttack = function( self, Func )
+            self.Data.OnAttack = Func
+        end,
+
+        Create = function( self )
+            if not self.Name then return end
+
+            local Req = table.Copy( self.Data )
+
+            Suits.Abilities[ self.Name ] = Req
+        end
+    }
+
+    Table.__index = Table
+
+    function Suits.CreateAbility( )
+        local Call = table.Copy( Table )
+        return setmetatable( { [ 0 ] = 0 }, Call )
+    end
+
+    -- Formally used to create Abilities, now and alias of `CreateAbility`
+    function Suits.CreateSuitAbility( ) return Suits.CreateAbility( ) end
 end
 
 function Suits.Sync( p )
@@ -56,7 +194,7 @@ function Suits.SetVar( e, k, v )
 end
 
 function Suits.SpawnSuit( p, k )
-    if not IsValid( p ) or not Suits.GetSuitData(k) then return end
+    if not IsValid( p ) or not Suits.GetSuit(k) then return end
 
     local trace = { }
 
@@ -71,20 +209,22 @@ function Suits.SpawnSuit( p, k )
     local e = ents.Create( "vs_suit_base" )
     if not IsValid( e ) then return end
 
-    e:SetPos( tr.HitPos )
-    e:Spawn( )
-
-    if Suits.GetPlayerSuit( p ) then
+    if p:GetSuit( ) then
         for kk, v in pairs( Suits.GetVar( p ) ) do
             e[ "Set" .. kk ]( e, v )
             Suits.SetVar( p, kk, nil )
+
+            print( kk, v )
         end
     else
-        local t = Suits.GetSuitData( k )
+        local t = Suits.GetSuit( k )
         e:SetSuit( k )
         e:SetSuitHealth( t.health )
         e:SetSuitArmor( t.armor )
     end
+
+    e:SetPos( tr.HitPos )
+    e:Spawn( )
 
     hook.Run( "VectivusSuits.SpawnedSuit", p, k )
 
@@ -94,7 +234,7 @@ end
 function Suits.EquipSuit( p, k, e )
     if not IsValid( p ) or not p:IsPlayer( ) then return end
 
-    local t = Suits.GetSuitData( k )
+    local t = Suits.GetSuit( k )
     
     e = IsValid( e ) and e or nil
     
@@ -115,6 +255,9 @@ function Suits.EquipSuit( p, k, e )
 
         if e then
             for k, v in pairs( e:GetNetworkVars( ) or { } ) do
+
+                print( e, k, v )
+
                 Suits.SetVar( p, k, v )
             end
         else
@@ -140,12 +283,10 @@ end )
 function Suits.RemoveSuit( p )
     if not IsValid( p ) or not p:IsPlayer( ) then return end
 
-    local t = Suits.GetPlayerSuitTable( p )
+    local t = p:GetSuitTable( )
     if not t then return end
 
     p.vs_suit_drop = nil
-
-    hook.Run( "VectivusSuits.OnRemovedSuit", p )
 
     do // remove stats
         if p:Alive( ) then
@@ -157,8 +298,10 @@ function Suits.RemoveSuit( p )
             p:SetHealth( 100 )
             p:SetArmor( 0 )
             p:SetJumpPower( 200 )
+
+            hook.Run( "VectivusSuits.OnRemovedSuit", p, t.name )
         else
-            hook.Run( "VectivusSuits.OnDeath", p, t )
+            hook.Run( "VectivusSuits.OnDeath", p, t.name )
         end
     end
 
@@ -171,19 +314,19 @@ hook.Add( "PlayerSpawn", "VectivusSuits.RemoveSuit", Suits.RemoveSuit )
 hook.Add( "PlayerDeath", "VectivusSuits.RemoveSuit", Suits.RemoveSuit )
 
 function Suits.DropSuit( p, txt )
-    if not IsValid(p) or not p:IsPlayer() then return end
+    if not IsValid( p ) or not p:IsPlayer( ) then return end
     if not Suits.Config.DropSuit[ txt or "" ] then return end
 
-    local k = Suits.GetPlayerSuit( p )
+    local k = p:GetSuit( )
     if not k then return end
 
     if hook.Run( "VectivusSuits.CanDropSuit", p ) == false then return "" end
 
     p.vs_suit_drop = true
 
-    p:SetNWFloat( "VectivusSuits.DropSuitEnd", CurTime() + Suits.Config.DropTime )
+    p:SetNWFloat( "VectivusSuits.DropSuitEnd", CurTime( ) + Suits.Config.DropTime )
 
-    timer.Create( "VectivusSuits.DropSuitEnd."..tostring(p), Suits.Config.DropTime, 1, function()
+    timer.Create( "VectivusSuits.DropSuitEnd." .. tostring( p ), Suits.Config.DropTime, 1, function( )
         if not IsValid( p ) or not p:IsPlayer( ) then return end
         if not p.vs_suit_drop then return end
     
@@ -195,8 +338,8 @@ function Suits.DropSuit( p, txt )
 
         p.vs_suit_drop = nil
 
-        timer.Simple( .2, function() 
-            if not IsValid(p) then return end
+        timer.Simple( .2, function( ) 
+            if not IsValid( p ) then return end
             p:SetMaterial( "" )
         end )
     end )
@@ -218,7 +361,7 @@ function Suits.OnTakeDamage( e, t )
     local p = IsValid( e ) and e:IsPlayer( ) and e
     if not IsValid( p ) or not p:IsPlayer( ) then return end
 
-    local data = Suits.GetPlayerSuitTable( p )
+    local data = p:GetSuitTable( )
     if not data then return end
 
     if hook.Run( "VectivusSuits.CanTakeDamage", p, t, data ) == false then t:SetDamage( 0 ) return end
@@ -230,9 +373,12 @@ function Suits.OnTakeDamage( e, t )
     local damage = t:GetDamage( )
 
     do // suit damage reduction
-        local wep = IsValid( t:GetWeapon( ) ) and t:GetWeapon( ):GetClass( )
-        if wep and data.weapons then
-            local Int = data.weapons[ wep ] or 0
+        local wep = IsValid( t:GetWeapon( ) ) and t:GetWeapon( )
+
+        local class = wep and wep:GetClass( )
+
+        if class and data.weapons then
+            local Int = data.weapons[ class ] or 0
             damage = math.floor( damage * ( 1 - ( Int / 100 ) ) )
         end
     end
@@ -246,6 +392,7 @@ function Suits.OnTakeDamage( e, t )
             else
                 damage = 0
             end
+
             Suits.SetVar( p, "SuitArmor", ap )
         end
     end
@@ -260,6 +407,7 @@ function Suits.OnTakeDamage( e, t )
             else
                 damage = 0
             end
+
             Suits.SetVar( p, "SuitHealth", hp )
         end
     end
@@ -273,14 +421,14 @@ hook.Add( "VectivusSuits.OnSuitDestroyed", "a", function( p, data, t )
 end )
 
 hook.Add( "VectivusSuits.CanTakeDamage", "a", function( p, t )
-    local inf = t:GetInflictor()
-    if t:IsFallDamage() then return false end
-    if inf and inf:GetClass() == "prop_physics" then return false end
+    local inf = t:GetInflictor( )
+    if t:IsFallDamage( ) then return false end
+    if inf and inf:GetClass( ) == "prop_physics" then return false end
 end )
 
 hook.Add( "VectivusSuits.OnTakeDamage", "a", function( p, t )
     do // Config OnTakeDamage
-        local tt = Suits.GetPlayerSuitTable( p )
+        local tt = p:GetSuitTable( )
         if tt and tt.OnTakeDamage then tt.OnTakeDamage( tt, p, t ) end
     end
 
@@ -294,34 +442,36 @@ hook.Add( "VectivusSuits.OnTakeDamage", "a", function( p, t )
     do // Abilities
         local Ability = Suits.Abilities
         local att = t:GetAttacker( ) or nil
-        local vic = Suits.GetPlayerSuitAbilityTable( p )
+        local vic = p:GetSuitAbilities( )
 
         if p == att then return end
 
         if att then
-            local _att = ( att and Suits.GetPlayerSuitAbilityTable( att ) ) or { }
+            local _att = att:GetSuitAbilities( )
+
+            local Att
 
             for i, kk in pairs( _att ) do
                 if not Ability[ kk or "" ] then continue end
 
                 local ii = att.vss_ability_start and att.vss_ability_start[ kk ]
 
-                if Ability[ kk ].OnAttack and ii then Ability[ kk ].OnAttack( att, p, t ) end // attacker
+                if Ability[ kk ].OnAttack and ii then Ability[ kk ].OnAttack( Ability[ kk ], att, p, t ) end // attacker
             end
         end
 
         if vic then
             for i, kk in pairs( vic ) do
-                if not Ability[kk or ""] then continue end
+                if not Ability[ kk or "" ] then continue end
 
                 local ii = p.vss_ability_start and p.vss_ability_start[ kk ]
 
-                if Ability[ kk ].OnAttacked and ii then Ability[ kk ].OnAttacked( p, att, t ) end // victim
+                if Ability[ kk ].OnAttacked and ii then Ability[ kk ].OnAttacked( Ability[ kk ], p, att, t ) end // victim
             end
         end
     end
 end )
 
 hook.Add( "PlayerShouldTakeDamage", "VectivusSuits.NoDamgeWearingSuit", function(p)
-    return not Suits.GetPlayerSuit( p ) and true or false
+    return not p:GetSuit( ) and true or false
 end )
