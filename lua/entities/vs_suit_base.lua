@@ -89,6 +89,8 @@ function ENT:Initialize( )
         self:GetPhysicsObject( ):Wake( )
     end
 
+	local Get = VectivusSuits.GetSuit( self:GetSuit( ) )
+
 	if VectivusSuits.Config.AutoDropRepar then
 		self:SetSuitHealth( Get.health )
 		self:SetSuitArmor( Get.armor )

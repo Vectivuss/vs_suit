@@ -324,7 +324,7 @@ function Suits.DropSuit( p, txt )
     timer.Create( "VectivusSuits.DropSuitEnd." .. tostring( p ), Suits.Config.DropTime, 1, function( )
         if not IsValid( p ) or not p:IsPlayer( ) then return end
         if not p.vs_suit_drop then return end
-    
+
         Suits.SpawnSuit( p, k )
 
         p:SetMaterial( "Models/effects/comball_tape" )
@@ -368,8 +368,8 @@ function Suits.OnTakeDamage( e, t )
     local damage = t:GetDamage( )
 
     do // suit damage reduction
-        local wep = IsValid( t:GetWeapon( ) ) and t:GetWeapon( )
-
+        local att = IsValid( t:GetAttacker( ) ) and t:GetAttacker( )
+        local wep = att and IsValid( att:GetActiveWeapon( ) ) and att:GetActiveWeapon( )
         local class = wep and wep:GetClass( )
 
         if class and data.weapons then
@@ -443,8 +443,6 @@ hook.Add( "VectivusSuits.OnTakeDamage", "a", function( p, t )
 
         if att then
             local _att = att:GetSuitAbilities( )
-
-            local Att
 
             for i, kk in pairs( _att ) do
                 if not Ability[ kk or "" ] then continue end
