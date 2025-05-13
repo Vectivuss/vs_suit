@@ -422,6 +422,9 @@ hook.Add( "VectivusSuits.CanTakeDamage", "a", function( p, t )
 end )
 
 hook.Add( "VectivusSuits.OnTakeDamage", "a", function( p, t )
+    local att = IsValid( t:GetAttacker( ) ) and t:GetAttacker( )
+    local vic = p:GetSuitAbilities( )
+
     do // Config OnTakeDamage
         local tt = p:GetSuitTable( )
         if tt and tt.OnTakeDamage then tt.OnTakeDamage( tt, p, t ) end
@@ -436,30 +439,34 @@ hook.Add( "VectivusSuits.OnTakeDamage", "a", function( p, t )
 
     do // Abilities
         local Ability = Suits.Abilities
-        local att = t:GetAttacker( ) or nil
-        local vic = p:GetSuitAbilities( )
 
         if p == att then return end
 
-        if att then
+        if ( att and att:IsPlayer( ) ) and att:GetSuit( ) then // attacker
             local _att = att:GetSuitAbilities( )
 
-            for i, kk in pairs( _att ) do
-                if not Ability[ kk or "" ] then continue end
+            for _, kk in pairs( _att ) do
+                local Int = att.vss_ability_start and att.vss_ability_start[ kk ]
+                if not Int then continue end
 
-                local ii = att.vss_ability_start and att.vss_ability_start[ kk ]
+                local Tbl = Ability[ kk or "" ]
+                if not Tbl then continue end
 
-                if Ability[ kk ].OnAttack and ii then Ability[ kk ].OnAttack( Ability[ kk ], att, p, t ) end // attacker
+                if Tbl.OnAttack then
+                    Tbl.OnAttack( Tbl, att, p, t )
+                end
             end
         end
 
-        if vic then
-            for i, kk in pairs( vic ) do
-                if not Ability[ kk or "" ] then continue end
+        for _, kk in pairs( vic or { } ) do // victim
+            local Int = p.vss_ability_start and p.vss_ability_start[ kk ]
+            if not Int then continue end
 
-                local ii = p.vss_ability_start and p.vss_ability_start[ kk ]
+            local Tbl = Ability[ kk or "" ]
+            if not Tbl then continue end
 
-                if Ability[ kk ].OnAttacked and ii then Ability[ kk ].OnAttacked( Ability[ kk ], p, att, t ) end // victim
+            if Tbl.OnAttacked then
+                Tbl.OnAttacked( Tbl, p, att, t ) 
             end
         end
     end
