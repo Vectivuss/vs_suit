@@ -2,7 +2,7 @@
 local ITEM = XeninInventory:CreateItemV2( )
 ITEM:SetMaxStack( 1 )
 
-ITEM:AddEquip(function( _, p, t )
+ITEM:AddEquip( function( _, p, t )
     if CLIENT then return true end
 
     local Ent = ents.Create( "vs_suit_base" )
@@ -17,13 +17,29 @@ ITEM:AddEquip(function( _, p, t )
     return true
 end, function( _, p, t )
     local Suit = p:GetSuit( )
-    return not Suit, Suit .. ", already equipped!"
+
+    if Suit then
+        return false, Suit .. ", already equipped!"
+    end
+
+    return true
 end )
 
-ITEM:AddDrop(function( _, _, Ent, t, _ )
+ITEM:AddDrop( function( _, p, Ent, t )
     for k, v in pairs( t and t.data or { } ) do
         Ent[ "Set" .. k ]( Ent, v )
     end
+
+    local trace = { }
+
+    trace.start = p:EyePos( )
+    trace.endpos = trace.start + p:GetAimVector( ) * 90
+    trace.filter = p
+
+    local tr = util.TraceLine( trace )
+
+    Ent:SetPos( tr.HitPos )
+    Ent:Spawn( )
 end )
 
 function ITEM:GetData( Ent )
